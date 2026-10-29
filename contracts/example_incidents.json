@@ -1,0 +1,2745 @@
+{
+  "schema_version": "1.0",
+  "meta": {
+    "analysis_id": "inc-2026-10-20",
+    "generated_at": "2026-10-20T10:14:31Z",
+    "domain": "support_tickets",
+    "dataset_name": "UCI Incident Management Process Enriched Event Log",
+    "item_type": "ticket",
+    "target": {
+      "name": "sla_breach",
+      "definition": "ticket missed its SLA deadline (made_sla = False on the last event)"
+    },
+    "prediction_moment": "when the ticket is opened",
+    "data_period": {
+      "start": "2016-02-29",
+      "end": "2016-05-31"
+    },
+    "current_period": {
+      "start": "2016-05-10",
+      "end": "2016-05-31"
+    },
+    "previous_period": {
+      "start": "2016-04-18",
+      "end": "2016-05-10"
+    },
+    "currency": null,
+    "timezone": "local time of source system"
+  },
+  "data_quality": {
+    "rows_in_raw_file": 141712,
+    "tickets_used_for_analysis": 24644,
+    "cleaning_steps": [
+      {
+        "step": "1. load raw file",
+        "rows_before": 141712,
+        "rows_after": 141712,
+        "rows_removed": 0,
+        "note": "24,918 tickets"
+      },
+      {
+        "step": "2. drop incident_state == -100",
+        "rows_before": 141712,
+        "rows_after": 141707,
+        "rows_removed": 5,
+        "note": ""
+      },
+      {
+        "step": "3. drop exact duplicate rows",
+        "rows_before": 141707,
+        "rows_after": 141707,
+        "rows_removed": 0,
+        "note": ""
+      },
+      {
+        "step": "7. keep tickets opened 29 Feb \u2013 31 May 2016",
+        "rows_before": 141707,
+        "rows_after": 140060,
+        "rows_removed": 1647,
+        "note": "tickets 24,918 \u2192 24,644"
+      },
+      {
+        "step": "8. drop tickets with impossible timelines",
+        "rows_before": 140060,
+        "rows_after": 140060,
+        "rows_removed": 0,
+        "note": "0 tickets"
+      },
+      {
+        "step": "12. final: one row per ticket",
+        "rows_before": 140060,
+        "rows_after": 24644,
+        "rows_removed": 115416,
+        "note": "events collapsed into tickets"
+      }
+    ],
+    "warnings": [
+      {
+        "level": "info",
+        "message": "Missing values were stored as '?' and converted to empty."
+      },
+      {
+        "level": "warning",
+        "message": "Breach rate drifts strongly over time (mid-March spike); compare periods with care."
+      },
+      {
+        "level": "info",
+        "message": "Five columns (caused_by, vendor, cmdb_ci, rfc, problem_id) are 98-100% empty and were reduced to yes/no flags."
+      }
+    ],
+    "modules": [
+      {
+        "module": "kpis",
+        "enabled": true
+      },
+      {
+        "module": "root_cause",
+        "enabled": true
+      },
+      {
+        "module": "sla_risk_model",
+        "enabled": true
+      },
+      {
+        "module": "forecast",
+        "enabled": true
+      },
+      {
+        "module": "revenue_impact",
+        "enabled": false,
+        "reason": "dataset has no cost or revenue column"
+      }
+    ]
+  },
+  "kpis": [
+    {
+      "id": "ticket_volume",
+      "label": "Tickets received",
+      "value": 4929,
+      "unit": "tickets",
+      "previous_value": 5524,
+      "change": -595,
+      "change_pct": -10.8,
+      "trend": "down",
+      "higher_is_better": null,
+      "status": "info",
+      "status_rule": null,
+      "definition": "Number of tickets opened in the period"
+    },
+    {
+      "id": "sla_breach_rate",
+      "label": "SLA breach rate",
+      "value": 0.225,
+      "unit": "ratio",
+      "previous_value": 0.234,
+      "change": -0.009,
+      "change_pct": -4.1,
+      "trend": "improving",
+      "higher_is_better": false,
+      "status": "good",
+      "status_rule": {
+        "mode": "level",
+        "warning": 0.25,
+        "critical": 0.35,
+        "meaning": "thresholds on the value"
+      },
+      "definition": "Share of tickets that missed their SLA deadline"
+    },
+    {
+      "id": "median_resolution_hours",
+      "label": "Median time to resolve",
+      "value": 2.9,
+      "unit": "hours",
+      "previous_value": 2.1,
+      "change": 0.8,
+      "change_pct": 34.9,
+      "trend": "worsening",
+      "higher_is_better": false,
+      "status": "good",
+      "status_rule": {
+        "mode": "level",
+        "warning": 24,
+        "critical": 48,
+        "meaning": "thresholds on the value"
+      },
+      "definition": "Median hours from opening to resolution"
+    },
+    {
+      "id": "reassignment_rate",
+      "label": "Tickets reassigned at least once",
+      "value": 0.368,
+      "unit": "ratio",
+      "previous_value": 0.396,
+      "change": -0.028,
+      "change_pct": -7.0,
+      "trend": "improving",
+      "higher_is_better": false,
+      "status": "warning",
+      "status_rule": {
+        "mode": "level",
+        "warning": 0.35,
+        "critical": 0.5,
+        "meaning": "thresholds on the value"
+      },
+      "definition": "Share of tickets passed to another team at least once"
+    },
+    {
+      "id": "reopen_rate",
+      "label": "Reopened tickets",
+      "value": 0.008,
+      "unit": "ratio",
+      "previous_value": 0.008,
+      "change": 0.0,
+      "change_pct": 2.1,
+      "trend": "worsening",
+      "higher_is_better": false,
+      "status": "good",
+      "status_rule": {
+        "mode": "level",
+        "warning": 0.02,
+        "critical": 0.05,
+        "meaning": "thresholds on the value"
+      },
+      "definition": "Share of tickets reopened after being resolved"
+    },
+    {
+      "id": "high_priority_share",
+      "label": "Critical + High priority share",
+      "value": 0.019,
+      "unit": "ratio",
+      "previous_value": 0.028,
+      "change": -0.008,
+      "change_pct": -30.1,
+      "trend": "improving",
+      "higher_is_better": false,
+      "status": "good",
+      "status_rule": {
+        "mode": "level",
+        "warning": 0.05,
+        "critical": 0.1,
+        "meaning": "thresholds on the value"
+      },
+      "definition": "Share of tickets with priority 1 or 2"
+    }
+  ],
+  "trends": {
+    "granularity": "week",
+    "series": [
+      {
+        "week_ending": "2016-03-06",
+        "tickets": 1858,
+        "breach_rate": 0.559,
+        "median_resolution_hours": 91.3
+      },
+      {
+        "week_ending": "2016-03-13",
+        "tickets": 2073,
+        "breach_rate": 0.958,
+        "median_resolution_hours": 99.1
+      },
+      {
+        "week_ending": "2016-03-20",
+        "tickets": 1975,
+        "breach_rate": 0.656,
+        "median_resolution_hours": 57.9
+      },
+      {
+        "week_ending": "2016-03-27",
+        "tickets": 1686,
+        "breach_rate": 0.392,
+        "median_resolution_hours": 49.4
+      },
+      {
+        "week_ending": "2016-04-03",
+        "tickets": 2174,
+        "breach_rate": 0.283,
+        "median_resolution_hours": 28.7
+      },
+      {
+        "week_ending": "2016-04-10",
+        "tickets": 2008,
+        "breach_rate": 0.244,
+        "median_resolution_hours": 11.4
+      },
+      {
+        "week_ending": "2016-04-17",
+        "tickets": 1995,
+        "breach_rate": 0.208,
+        "median_resolution_hours": 4.2
+      },
+      {
+        "week_ending": "2016-04-24",
+        "tickets": 1401,
+        "breach_rate": 0.343,
+        "median_resolution_hours": 4.2
+      },
+      {
+        "week_ending": "2016-05-01",
+        "tickets": 2046,
+        "breach_rate": 0.177,
+        "median_resolution_hours": 1.2
+      },
+      {
+        "week_ending": "2016-05-08",
+        "tickets": 2064,
+        "breach_rate": 0.227,
+        "median_resolution_hours": 2.6
+      },
+      {
+        "week_ending": "2016-05-15",
+        "tickets": 1736,
+        "breach_rate": 0.233,
+        "median_resolution_hours": 4.8
+      },
+      {
+        "week_ending": "2016-05-22",
+        "tickets": 1779,
+        "breach_rate": 0.205,
+        "median_resolution_hours": 2.7
+      },
+      {
+        "week_ending": "2016-05-29",
+        "tickets": 1177,
+        "breach_rate": 0.257,
+        "median_resolution_hours": 2.2
+      },
+      {
+        "week_ending": "2016-06-05",
+        "tickets": 672,
+        "breach_rate": 0.202,
+        "median_resolution_hours": 2.3
+      }
+    ]
+  },
+  "breakdowns": [
+    {
+      "dimension": "assignment_group",
+      "label": "Team (assignment group)",
+      "sorted_by": "breaches",
+      "rows": [
+        {
+          "value": "Group 70",
+          "tickets": 2562,
+          "breach_rate": 0.09,
+          "breaches": 231,
+          "share_of_all_breaches": 0.209,
+          "vs_overall_breach_rate": -0.134,
+          "median_resolution_hours": 0.3,
+          "avg_reassignments": 0.5,
+          "flag": "normal"
+        },
+        {
+          "value": "Group 20",
+          "tickets": 302,
+          "breach_rate": 0.401,
+          "breaches": 121,
+          "share_of_all_breaches": 0.109,
+          "vs_overall_breach_rate": 0.176,
+          "median_resolution_hours": 47.2,
+          "avg_reassignments": 1.65,
+          "flag": "above_average"
+        },
+        {
+          "value": "Group 65",
+          "tickets": 170,
+          "breach_rate": 0.371,
+          "breaches": 63,
+          "share_of_all_breaches": 0.057,
+          "vs_overall_breach_rate": 0.146,
+          "median_resolution_hours": 37.8,
+          "avg_reassignments": 1.18,
+          "flag": "above_average"
+        },
+        {
+          "value": "Group 25",
+          "tickets": 131,
+          "breach_rate": 0.458,
+          "breaches": 60,
+          "share_of_all_breaches": 0.054,
+          "vs_overall_breach_rate": 0.233,
+          "median_resolution_hours": 89.3,
+          "avg_reassignments": 0.27,
+          "flag": "above_average"
+        },
+        {
+          "value": "Group 22",
+          "tickets": 111,
+          "breach_rate": 0.414,
+          "breaches": 46,
+          "share_of_all_breaches": 0.042,
+          "vs_overall_breach_rate": 0.19,
+          "median_resolution_hours": 30.9,
+          "avg_reassignments": 0.9,
+          "flag": "above_average"
+        },
+        {
+          "value": "Group 57",
+          "tickets": 83,
+          "breach_rate": 0.542,
+          "breaches": 45,
+          "share_of_all_breaches": 0.041,
+          "vs_overall_breach_rate": 0.318,
+          "median_resolution_hours": 89.8,
+          "avg_reassignments": 1.02,
+          "flag": "above_average"
+        },
+        {
+          "value": "Group 66",
+          "tickets": 78,
+          "breach_rate": 0.577,
+          "breaches": 45,
+          "share_of_all_breaches": 0.041,
+          "vs_overall_breach_rate": 0.352,
+          "median_resolution_hours": 144.1,
+          "avg_reassignments": 1.79,
+          "flag": "above_average"
+        },
+        {
+          "value": "Group 9",
+          "tickets": 52,
+          "breach_rate": 0.865,
+          "breaches": 45,
+          "share_of_all_breaches": 0.041,
+          "vs_overall_breach_rate": 0.641,
+          "median_resolution_hours": 1212.7,
+          "avg_reassignments": 1.63,
+          "flag": "above_average"
+        }
+      ]
+    },
+    {
+      "dimension": "category",
+      "label": "Category",
+      "sorted_by": "breaches",
+      "rows": [
+        {
+          "value": "Category 46",
+          "tickets": 509,
+          "breach_rate": 0.413,
+          "breaches": 210,
+          "share_of_all_breaches": 0.19,
+          "vs_overall_breach_rate": 0.188,
+          "median_resolution_hours": 47.1,
+          "avg_reassignments": 0.67,
+          "flag": "above_average"
+        },
+        {
+          "value": "Category 53",
+          "tickets": 427,
+          "breach_rate": 0.269,
+          "breaches": 115,
+          "share_of_all_breaches": 0.104,
+          "vs_overall_breach_rate": 0.045,
+          "median_resolution_hours": 14.2,
+          "avg_reassignments": 0.99,
+          "flag": "normal"
+        },
+        {
+          "value": "Category 57",
+          "tickets": 291,
+          "breach_rate": 0.368,
+          "breaches": 107,
+          "share_of_all_breaches": 0.097,
+          "vs_overall_breach_rate": 0.143,
+          "median_resolution_hours": 45.0,
+          "avg_reassignments": 1.21,
+          "flag": "above_average"
+        },
+        {
+          "value": "Category 23",
+          "tickets": 231,
+          "breach_rate": 0.39,
+          "breaches": 90,
+          "share_of_all_breaches": 0.081,
+          "vs_overall_breach_rate": 0.165,
+          "median_resolution_hours": 30.0,
+          "avg_reassignments": 1.67,
+          "flag": "above_average"
+        },
+        {
+          "value": "Category 9",
+          "tickets": 270,
+          "breach_rate": 0.326,
+          "breaches": 88,
+          "share_of_all_breaches": 0.079,
+          "vs_overall_breach_rate": 0.101,
+          "median_resolution_hours": 26.8,
+          "avg_reassignments": 0.4,
+          "flag": "above_average"
+        },
+        {
+          "value": "Category 42",
+          "tickets": 893,
+          "breach_rate": 0.08,
+          "breaches": 71,
+          "share_of_all_breaches": 0.064,
+          "vs_overall_breach_rate": -0.145,
+          "median_resolution_hours": 0.3,
+          "avg_reassignments": 0.49,
+          "flag": "normal"
+        },
+        {
+          "value": "Category 26",
+          "tickets": 676,
+          "breach_rate": 0.093,
+          "breaches": 63,
+          "share_of_all_breaches": 0.057,
+          "vs_overall_breach_rate": -0.131,
+          "median_resolution_hours": 0.4,
+          "avg_reassignments": 0.41,
+          "flag": "normal"
+        },
+        {
+          "value": "Category 61",
+          "tickets": 149,
+          "breach_rate": 0.362,
+          "breaches": 54,
+          "share_of_all_breaches": 0.049,
+          "vs_overall_breach_rate": 0.138,
+          "median_resolution_hours": 46.5,
+          "avg_reassignments": 0.77,
+          "flag": "above_average"
+        }
+      ]
+    },
+    {
+      "dimension": "priority_n",
+      "label": "Priority (1 = Critical)",
+      "sorted_by": "breaches",
+      "rows": [
+        {
+          "value": "3.0",
+          "tickets": 4699,
+          "breach_rate": 0.217,
+          "breaches": 1019,
+          "share_of_all_breaches": 0.921,
+          "vs_overall_breach_rate": -0.008,
+          "median_resolution_hours": 2.9,
+          "avg_reassignments": 0.69,
+          "flag": "normal"
+        },
+        {
+          "value": "2.0",
+          "tickets": 61,
+          "breach_rate": 0.951,
+          "breaches": 58,
+          "share_of_all_breaches": 0.052,
+          "vs_overall_breach_rate": 0.726,
+          "median_resolution_hours": 20.8,
+          "avg_reassignments": 1.13,
+          "flag": "above_average"
+        },
+        {
+          "value": "1.0",
+          "tickets": 35,
+          "breach_rate": 0.771,
+          "breaches": 27,
+          "share_of_all_breaches": 0.024,
+          "vs_overall_breach_rate": 0.547,
+          "median_resolution_hours": 69.7,
+          "avg_reassignments": 2.14,
+          "flag": "above_average"
+        },
+        {
+          "value": "4.0",
+          "tickets": 134,
+          "breach_rate": 0.022,
+          "breaches": 3,
+          "share_of_all_breaches": 0.003,
+          "vs_overall_breach_rate": -0.202,
+          "median_resolution_hours": 0.2,
+          "avg_reassignments": 0.42,
+          "flag": "normal"
+        }
+      ]
+    }
+  ],
+  "root_causes": [
+    {
+      "id": "RC1",
+      "title": "Tickets bounced between teams (reassignment)",
+      "category": "process",
+      "finding": "Breach rate rises from 22% with no reassignment to 43% after one and 86% after five or more.",
+      "evidence": [
+        {
+          "segment": "0 reassignments",
+          "breach_rate": 0.215
+        },
+        {
+          "segment": "1 reassignment",
+          "breach_rate": 0.43
+        },
+        {
+          "segment": "2+ reassignments",
+          "breach_rate": 0.687,
+          "tickets": 5075
+        },
+        {
+          "segment": "5+ reassignments",
+          "breach_rate": 0.859
+        }
+      ],
+      "affected_tickets_current_period": 789,
+      "share_of_breaches_current_period": 0.407,
+      "confidence": "high",
+      "linked_recommendations": [
+        "REC1"
+      ],
+      "note": "Correlation from historical data; reassignment is an outcome, so it is used for root-cause analysis, not as a model input."
+    },
+    {
+      "id": "RC2",
+      "title": "Group 20 is under strain",
+      "category": "capacity",
+      "finding": "Group 20 breached 40% of its 302 tickets this period vs 22% overall.",
+      "evidence": [
+        {
+          "segment": "Group 20",
+          "breach_rate": 0.401,
+          "tickets": 302
+        },
+        {
+          "segment": "all teams",
+          "breach_rate": 0.225,
+          "tickets": 4929
+        }
+      ],
+      "affected_tickets_current_period": 302,
+      "share_of_breaches_current_period": 0.109,
+      "confidence": "medium",
+      "linked_recommendations": [
+        "REC2"
+      ]
+    },
+    {
+      "id": "RC3",
+      "title": "Reopened tickets",
+      "category": "quality",
+      "finding": "Reopened tickets breach 76% of the time vs 36% for others.",
+      "evidence": [
+        {
+          "segment": "reopened",
+          "breach_rate": 0.764
+        },
+        {
+          "segment": "not reopened",
+          "breach_rate": 0.362
+        }
+      ],
+      "affected_tickets_current_period": 41,
+      "share_of_breaches_current_period": 0.023,
+      "confidence": "medium",
+      "linked_recommendations": []
+    }
+  ],
+  "anomalies": [
+    {
+      "week_ending": "2016-03-06",
+      "metric": "breach_rate",
+      "label": "Weekly SLA breach rate",
+      "actual": 0.559,
+      "expected": 0.251,
+      "deviation_score": 4.4,
+      "severity": "critical",
+      "direction": "above_normal"
+    },
+    {
+      "week_ending": "2016-03-13",
+      "metric": "breach_rate",
+      "label": "Weekly SLA breach rate",
+      "actual": 0.958,
+      "expected": 0.251,
+      "deviation_score": 10.2,
+      "severity": "critical",
+      "direction": "above_normal"
+    },
+    {
+      "week_ending": "2016-03-20",
+      "metric": "breach_rate",
+      "label": "Weekly SLA breach rate",
+      "actual": 0.656,
+      "expected": 0.251,
+      "deviation_score": 5.8,
+      "severity": "critical",
+      "direction": "above_normal"
+    },
+    {
+      "week_ending": "2016-03-27",
+      "metric": "breach_rate",
+      "label": "Weekly SLA breach rate",
+      "actual": 0.392,
+      "expected": 0.251,
+      "deviation_score": 2.0,
+      "severity": "warning",
+      "direction": "above_normal"
+    }
+  ],
+  "forecast": {
+    "method": "AutoETS (Holt-Winters, auto-tuned)",
+    "horizon_days": 7,
+    "backtest_mean_abs_error": [
+      {
+        "method": "AutoETS (Holt-Winters, auto-tuned)",
+        "mean_abs_error": 8.68
+      },
+      {
+        "method": "weekday average (4 weeks)",
+        "mean_abs_error": 8.82
+      },
+      {
+        "method": "MSTL (trend + weekly pattern)",
+        "mean_abs_error": 8.98
+      },
+      {
+        "method": "weekday average x recent trend",
+        "mean_abs_error": 10.19
+      },
+      {
+        "method": "same day last week",
+        "mean_abs_error": 11.3
+      },
+      {
+        "method": "flat 4-week average",
+        "mean_abs_error": 19.23
+      }
+    ],
+    "capacity_rule": "tickets the team resolved on the same weekday, averaged over the last 4 weeks",
+    "overload_rule": "expected tickets > capacity x 1.1 and at least 1 ticket more",
+    "teams": [
+      {
+        "team": "Group 70",
+        "expected_tickets_7d": 941,
+        "expected_capacity_7d": 800,
+        "overloaded_days": 6,
+        "daily": [
+          {
+            "date": "2016-06-01",
+            "expected_tickets": 173.7,
+            "expected_capacity": 164.2,
+            "overload": false
+          },
+          {
+            "date": "2016-06-02",
+            "expected_tickets": 160.8,
+            "expected_capacity": 134.2,
+            "overload": true
+          },
+          {
+            "date": "2016-06-03",
+            "expected_tickets": 167.6,
+            "expected_capacity": 133.0,
+            "overload": true
+          },
+          {
+            "date": "2016-06-04",
+            "expected_tickets": 26.8,
+            "expected_capacity": 18.8,
+            "overload": true
+          },
+          {
+            "date": "2016-06-05",
+            "expected_tickets": 23.2,
+            "expected_capacity": 15.8,
+            "overload": true
+          },
+          {
+            "date": "2016-06-06",
+            "expected_tickets": 219.1,
+            "expected_capacity": 188.5,
+            "overload": true
+          },
+          {
+            "date": "2016-06-07",
+            "expected_tickets": 170.2,
+            "expected_capacity": 145.2,
+            "overload": true
+          }
+        ]
+      },
+      {
+        "team": "Group 20",
+        "expected_tickets_7d": 111,
+        "expected_capacity_7d": 97,
+        "overloaded_days": 3,
+        "daily": [
+          {
+            "date": "2016-06-01",
+            "expected_tickets": 21.5,
+            "expected_capacity": 20.5,
+            "overload": false
+          },
+          {
+            "date": "2016-06-02",
+            "expected_tickets": 18.9,
+            "expected_capacity": 15.0,
+            "overload": true
+          },
+          {
+            "date": "2016-06-03",
+            "expected_tickets": 16.8,
+            "expected_capacity": 16.8,
+            "overload": false
+          },
+          {
+            "date": "2016-06-04",
+            "expected_tickets": 3.1,
+            "expected_capacity": 1.0,
+            "overload": true
+          },
+          {
+            "date": "2016-06-05",
+            "expected_tickets": 3.7,
+            "expected_capacity": 0.8,
+            "overload": true
+          },
+          {
+            "date": "2016-06-06",
+            "expected_tickets": 25.9,
+            "expected_capacity": 23.8,
+            "overload": false
+          },
+          {
+            "date": "2016-06-07",
+            "expected_tickets": 21.0,
+            "expected_capacity": 19.5,
+            "overload": false
+          }
+        ]
+      },
+      {
+        "team": "Group 65",
+        "expected_tickets_7d": 47,
+        "expected_capacity_7d": 53,
+        "overloaded_days": 2,
+        "daily": [
+          {
+            "date": "2016-06-01",
+            "expected_tickets": 9.6,
+            "expected_capacity": 12.8,
+            "overload": false
+          },
+          {
+            "date": "2016-06-02",
+            "expected_tickets": 6.2,
+            "expected_capacity": 9.5,
+            "overload": false
+          },
+          {
+            "date": "2016-06-03",
+            "expected_tickets": 6.3,
+            "expected_capacity": 8.5,
+            "overload": false
+          },
+          {
+            "date": "2016-06-04",
+            "expected_tickets": 3.6,
+            "expected_capacity": 0.5,
+            "overload": true
+          },
+          {
+            "date": "2016-06-05",
+            "expected_tickets": 3.4,
+            "expected_capacity": 0.5,
+            "overload": true
+          },
+          {
+            "date": "2016-06-06",
+            "expected_tickets": 9.4,
+            "expected_capacity": 12.2,
+            "overload": false
+          },
+          {
+            "date": "2016-06-07",
+            "expected_tickets": 8.6,
+            "expected_capacity": 9.2,
+            "overload": false
+          }
+        ]
+      },
+      {
+        "team": "Group 25",
+        "expected_tickets_7d": 45,
+        "expected_capacity_7d": 41,
+        "overloaded_days": 2,
+        "daily": [
+          {
+            "date": "2016-06-01",
+            "expected_tickets": 10.4,
+            "expected_capacity": 4.8,
+            "overload": true
+          },
+          {
+            "date": "2016-06-02",
+            "expected_tickets": 8.4,
+            "expected_capacity": 11.0,
+            "overload": false
+          },
+          {
+            "date": "2016-06-03",
+            "expected_tickets": 7.7,
+            "expected_capacity": 7.2,
+            "overload": false
+          },
+          {
+            "date": "2016-06-04",
+            "expected_tickets": 0.0,
+            "expected_capacity": 0.0,
+            "overload": false
+          },
+          {
+            "date": "2016-06-05",
+            "expected_tickets": 0.0,
+            "expected_capacity": 0.0,
+            "overload": false
+          },
+          {
+            "date": "2016-06-06",
+            "expected_tickets": 10.1,
+            "expected_capacity": 11.0,
+            "overload": false
+          },
+          {
+            "date": "2016-06-07",
+            "expected_tickets": 8.2,
+            "expected_capacity": 7.0,
+            "overload": true
+          }
+        ]
+      },
+      {
+        "team": "Group 24",
+        "expected_tickets_7d": 34,
+        "expected_capacity_7d": 42,
+        "overloaded_days": 1,
+        "daily": [
+          {
+            "date": "2016-06-01",
+            "expected_tickets": 6.6,
+            "expected_capacity": 9.2,
+            "overload": false
+          },
+          {
+            "date": "2016-06-02",
+            "expected_tickets": 6.4,
+            "expected_capacity": 5.8,
+            "overload": false
+          },
+          {
+            "date": "2016-06-03",
+            "expected_tickets": 7.2,
+            "expected_capacity": 5.0,
+            "overload": true
+          },
+          {
+            "date": "2016-06-04",
+            "expected_tickets": 0.0,
+            "expected_capacity": 0.0,
+            "overload": false
+          },
+          {
+            "date": "2016-06-05",
+            "expected_tickets": 0.0,
+            "expected_capacity": 0.2,
+            "overload": false
+          },
+          {
+            "date": "2016-06-06",
+            "expected_tickets": 7.3,
+            "expected_capacity": 11.2,
+            "overload": false
+          },
+          {
+            "date": "2016-06-07",
+            "expected_tickets": 6.9,
+            "expected_capacity": 11.0,
+            "overload": false
+          }
+        ]
+      }
+    ]
+  },
+  "predictions": {
+    "count_shown": 10,
+    "sorted_by": "risk",
+    "risk_level_rules": {
+      "high": "risk \u2265 0.548 (top 10%)",
+      "medium": "risk \u2265 0.233 (top 40%)",
+      "low": "below medium"
+    },
+    "items": [
+      {
+        "id": "INC0034423",
+        "item_type": "ticket",
+        "context": {
+          "opened_at": "2016-05-31T19:09",
+          "team": "Group 22",
+          "category": "Category 46",
+          "subcategory": "Subcategory 251",
+          "priority": 2,
+          "location": "Location 54",
+          "contact_type": "Phone"
+        },
+        "prediction": {
+          "target": "sla_breach",
+          "risk": 0.935,
+          "risk_level": "high",
+          "risk_percentile": 99.8,
+          "prediction_moment": "ticket opened"
+        },
+        "top_reasons": [
+          {
+            "feature": "priority_n",
+            "label": "Priority (1 = Critical)",
+            "value": 2.0,
+            "typical_value": 3.0,
+            "effect": 1.66,
+            "direction": "increases risk",
+            "sentence": "Priority (1 = Critical): 2 (usual: 3), increases risk"
+          },
+          {
+            "feature": "u_symptom_cat",
+            "label": "Reported symptom",
+            "value": "Other",
+            "typical_value": "Symptom 491",
+            "effect": 0.412,
+            "direction": "increases risk",
+            "sentence": "Reported symptom: Other (most common: Symptom 491), increases risk"
+          },
+          {
+            "feature": "group_recent_breach_rate_7d",
+            "label": "Team's breach rate in last 7 days",
+            "value": 0.41,
+            "typical_value": 0.36,
+            "effect": 0.404,
+            "direction": "increases risk",
+            "sentence": "Team's breach rate in last 7 days: 0.41 (usual: 0.36), increases risk"
+          }
+        ],
+        "explanation_summary": "High risk (94%) of missing SLA, mainly because: Priority (1 = Critical): 2 (usual: 3), increases risk; Reported symptom: Other (most common: Symptom 491), increases risk; Team's breach rate in last 7 days: 0.41 (usual: 0.36), increases risk.",
+        "similar_past_cases": {
+          "rule": "same category and team, training period",
+          "count": 107,
+          "breach_rate": 0.589,
+          "median_resolution_hours": 131.6
+        },
+        "recommended_action": {
+          "recommendation_id": "REC3",
+          "action": "Fast-track: senior agent picks it up within 1 hour",
+          "urgency": "now"
+        },
+        "actual_outcome": {
+          "breached": true,
+          "note": "known only because this is historical data; hidden in a live system"
+        }
+      },
+      {
+        "id": "INC0034416",
+        "item_type": "ticket",
+        "context": {
+          "opened_at": "2016-05-31T18:29",
+          "team": "Group 22",
+          "category": "Category 46",
+          "subcategory": "Subcategory 251",
+          "priority": 2,
+          "location": "Location 51",
+          "contact_type": "Phone"
+        },
+        "prediction": {
+          "target": "sla_breach",
+          "risk": 0.922,
+          "risk_level": "high",
+          "risk_percentile": 99.6,
+          "prediction_moment": "ticket opened"
+        },
+        "top_reasons": [
+          {
+            "feature": "priority_n",
+            "label": "Priority (1 = Critical)",
+            "value": 2.0,
+            "typical_value": 3.0,
+            "effect": 1.656,
+            "direction": "increases risk",
+            "sentence": "Priority (1 = Critical): 2 (usual: 3), increases risk"
+          },
+          {
+            "feature": "assignment_group_cat",
+            "label": "Assigned team",
+            "value": "Group 22",
+            "typical_value": "Group 70",
+            "effect": 0.43,
+            "direction": "increases risk",
+            "sentence": "Assigned team: Group 22 (most common: Group 70), increases risk"
+          },
+          {
+            "feature": "u_symptom_cat",
+            "label": "Reported symptom",
+            "value": "Other",
+            "typical_value": "Symptom 491",
+            "effect": 0.404,
+            "direction": "increases risk",
+            "sentence": "Reported symptom: Other (most common: Symptom 491), increases risk"
+          }
+        ],
+        "explanation_summary": "High risk (92%) of missing SLA, mainly because: Priority (1 = Critical): 2 (usual: 3), increases risk; Assigned team: Group 22 (most common: Group 70), increases risk; Reported symptom: Other (most common: Symptom 491), increases risk.",
+        "similar_past_cases": {
+          "rule": "same category and team, training period",
+          "count": 107,
+          "breach_rate": 0.589,
+          "median_resolution_hours": 131.6
+        },
+        "recommended_action": {
+          "recommendation_id": "REC3",
+          "action": "Fast-track: senior agent picks it up within 1 hour",
+          "urgency": "now"
+        },
+        "actual_outcome": {
+          "breached": true,
+          "note": "known only because this is historical data; hidden in a live system"
+        }
+      },
+      {
+        "id": "INC0034330",
+        "item_type": "ticket",
+        "context": {
+          "opened_at": "2016-05-31T14:54",
+          "team": "Group 9",
+          "category": "Category 34",
+          "subcategory": "Subcategory 154",
+          "priority": 3,
+          "location": "Location 93",
+          "contact_type": "Phone"
+        },
+        "prediction": {
+          "target": "sla_breach",
+          "risk": 0.915,
+          "risk_level": "high",
+          "risk_percentile": 99.6,
+          "prediction_moment": "ticket opened"
+        },
+        "top_reasons": [
+          {
+            "feature": "assignment_group_cat",
+            "label": "Assigned team",
+            "value": "Group 9",
+            "typical_value": "Group 70",
+            "effect": 1.436,
+            "direction": "increases risk",
+            "sentence": "Assigned team: Group 9 (most common: Group 70), increases risk"
+          },
+          {
+            "feature": "group_recent_breach_rate_7d",
+            "label": "Team's breach rate in last 7 days",
+            "value": 0.54,
+            "typical_value": 0.36,
+            "effect": 0.507,
+            "direction": "increases risk",
+            "sentence": "Team's breach rate in last 7 days: 0.54 (usual: 0.36), increases risk"
+          },
+          {
+            "feature": "subcategory_cat",
+            "label": "Subcategory",
+            "value": "Subcategory 154",
+            "typical_value": "Subcategory 174",
+            "effect": 0.492,
+            "direction": "increases risk",
+            "sentence": "Subcategory: Subcategory 154 (most common: Subcategory 174), increases risk"
+          }
+        ],
+        "explanation_summary": "High risk (92%) of missing SLA, mainly because: Assigned team: Group 9 (most common: Group 70), increases risk; Team's breach rate in last 7 days: 0.54 (usual: 0.36), increases risk; Subcategory: Subcategory 154 (most common: Subcategory 174), increases risk.",
+        "similar_past_cases": {
+          "rule": "same category and team, training period",
+          "count": 192,
+          "breach_rate": 0.938,
+          "median_resolution_hours": 2018.8
+        },
+        "recommended_action": {
+          "recommendation_id": "REC3",
+          "action": "Fast-track: senior agent picks it up within 1 hour",
+          "urgency": "now"
+        },
+        "actual_outcome": {
+          "breached": true,
+          "note": "known only because this is historical data; hidden in a live system"
+        }
+      },
+      {
+        "id": "INC0034429",
+        "item_type": "ticket",
+        "context": {
+          "opened_at": "2016-05-31T19:34",
+          "team": "Group 57",
+          "category": "Category 46",
+          "subcategory": "Subcategory 248",
+          "priority": 2,
+          "location": "Location 143",
+          "contact_type": "Phone"
+        },
+        "prediction": {
+          "target": "sla_breach",
+          "risk": 0.915,
+          "risk_level": "high",
+          "risk_percentile": 99.5,
+          "prediction_moment": "ticket opened"
+        },
+        "top_reasons": [
+          {
+            "feature": "priority_n",
+            "label": "Priority (1 = Critical)",
+            "value": 2.0,
+            "typical_value": 3.0,
+            "effect": 1.733,
+            "direction": "increases risk",
+            "sentence": "Priority (1 = Critical): 2 (usual: 3), increases risk"
+          },
+          {
+            "feature": "assignment_group_cat",
+            "label": "Assigned team",
+            "value": "Group 57",
+            "typical_value": "Group 70",
+            "effect": 0.573,
+            "direction": "increases risk",
+            "sentence": "Assigned team: Group 57 (most common: Group 70), increases risk"
+          },
+          {
+            "feature": "group_recent_breach_rate_7d",
+            "label": "Team's breach rate in last 7 days",
+            "value": 0.43,
+            "typical_value": 0.36,
+            "effect": 0.417,
+            "direction": "increases risk",
+            "sentence": "Team's breach rate in last 7 days: 0.43 (usual: 0.36), increases risk"
+          }
+        ],
+        "explanation_summary": "High risk (91%) of missing SLA, mainly because: Priority (1 = Critical): 2 (usual: 3), increases risk; Assigned team: Group 57 (most common: Group 70), increases risk; Team's breach rate in last 7 days: 0.43 (usual: 0.36), increases risk.",
+        "similar_past_cases": {
+          "rule": "same category and team, training period",
+          "count": 219,
+          "breach_rate": 0.571,
+          "median_resolution_hours": 112.5
+        },
+        "recommended_action": {
+          "recommendation_id": "REC3",
+          "action": "Fast-track: senior agent picks it up within 1 hour",
+          "urgency": "now"
+        },
+        "actual_outcome": {
+          "breached": true,
+          "note": "known only because this is historical data; hidden in a live system"
+        }
+      },
+      {
+        "id": "INC0034380",
+        "item_type": "ticket",
+        "context": {
+          "opened_at": "2016-05-31T16:11",
+          "team": "Group 55",
+          "category": "Category 42",
+          "subcategory": "Subcategory 29",
+          "priority": 1,
+          "location": "Location 15",
+          "contact_type": "Phone"
+        },
+        "prediction": {
+          "target": "sla_breach",
+          "risk": 0.909,
+          "risk_level": "high",
+          "risk_percentile": 99.4,
+          "prediction_moment": "ticket opened"
+        },
+        "top_reasons": [
+          {
+            "feature": "priority_n",
+            "label": "Priority (1 = Critical)",
+            "value": 1.0,
+            "typical_value": 3.0,
+            "effect": 1.841,
+            "direction": "increases risk",
+            "sentence": "Priority (1 = Critical): 1 (usual: 3), increases risk"
+          },
+          {
+            "feature": "location_cat",
+            "label": "Location",
+            "value": "Location 15",
+            "typical_value": "Location 204",
+            "effect": 0.462,
+            "direction": "increases risk",
+            "sentence": "Location: Location 15 (most common: Location 204), increases risk"
+          },
+          {
+            "feature": "impact_x_urgency",
+            "label": "Impact \u00d7 urgency score",
+            "value": 1.0,
+            "typical_value": 4.0,
+            "effect": 0.393,
+            "direction": "increases risk",
+            "sentence": "Impact \u00d7 urgency score: 1 (usual: 4), increases risk"
+          }
+        ],
+        "explanation_summary": "High risk (91%) of missing SLA, mainly because: Priority (1 = Critical): 1 (usual: 3), increases risk; Location: Location 15 (most common: Location 204), increases risk; Impact \u00d7 urgency score: 1 (usual: 4), increases risk.",
+        "similar_past_cases": {
+          "rule": "same category and team, training period",
+          "count": 117,
+          "breach_rate": 0.436,
+          "median_resolution_hours": 18.4
+        },
+        "recommended_action": {
+          "recommendation_id": "REC3",
+          "action": "Fast-track: senior agent picks it up within 1 hour",
+          "urgency": "now"
+        },
+        "actual_outcome": {
+          "breached": true,
+          "note": "known only because this is historical data; hidden in a live system"
+        }
+      },
+      {
+        "id": "INC0034301",
+        "item_type": "ticket",
+        "context": {
+          "opened_at": "2016-05-31T14:13",
+          "team": "Group 9",
+          "category": "Category 34",
+          "subcategory": "Subcategory 154",
+          "priority": 3,
+          "location": "Location 161",
+          "contact_type": "Phone"
+        },
+        "prediction": {
+          "target": "sla_breach",
+          "risk": 0.904,
+          "risk_level": "high",
+          "risk_percentile": 99.4,
+          "prediction_moment": "ticket opened"
+        },
+        "top_reasons": [
+          {
+            "feature": "assignment_group_cat",
+            "label": "Assigned team",
+            "value": "Group 9",
+            "typical_value": "Group 70",
+            "effect": 1.461,
+            "direction": "increases risk",
+            "sentence": "Assigned team: Group 9 (most common: Group 70), increases risk"
+          },
+          {
+            "feature": "subcategory_cat",
+            "label": "Subcategory",
+            "value": "Subcategory 154",
+            "typical_value": "Subcategory 174",
+            "effect": 0.531,
+            "direction": "increases risk",
+            "sentence": "Subcategory: Subcategory 154 (most common: Subcategory 174), increases risk"
+          },
+          {
+            "feature": "group_recent_breach_rate_7d",
+            "label": "Team's breach rate in last 7 days",
+            "value": 0.54,
+            "typical_value": 0.36,
+            "effect": 0.509,
+            "direction": "increases risk",
+            "sentence": "Team's breach rate in last 7 days: 0.54 (usual: 0.36), increases risk"
+          }
+        ],
+        "explanation_summary": "High risk (90%) of missing SLA, mainly because: Assigned team: Group 9 (most common: Group 70), increases risk; Subcategory: Subcategory 154 (most common: Subcategory 174), increases risk; Team's breach rate in last 7 days: 0.54 (usual: 0.36), increases risk.",
+        "similar_past_cases": {
+          "rule": "same category and team, training period",
+          "count": 192,
+          "breach_rate": 0.938,
+          "median_resolution_hours": 2018.8
+        },
+        "recommended_action": {
+          "recommendation_id": "REC3",
+          "action": "Fast-track: senior agent picks it up within 1 hour",
+          "urgency": "now"
+        },
+        "actual_outcome": {
+          "breached": true,
+          "note": "known only because this is historical data; hidden in a live system"
+        }
+      },
+      {
+        "id": "INC0034268",
+        "item_type": "ticket",
+        "context": {
+          "opened_at": "2016-05-31T13:13",
+          "team": "Group 9",
+          "category": "Category 34",
+          "subcategory": "Subcategory 154",
+          "priority": 3,
+          "location": "Location 161",
+          "contact_type": "Phone"
+        },
+        "prediction": {
+          "target": "sla_breach",
+          "risk": 0.893,
+          "risk_level": "high",
+          "risk_percentile": 99.1,
+          "prediction_moment": "ticket opened"
+        },
+        "top_reasons": [
+          {
+            "feature": "assignment_group_cat",
+            "label": "Assigned team",
+            "value": "Group 9",
+            "typical_value": "Group 70",
+            "effect": 1.418,
+            "direction": "increases risk",
+            "sentence": "Assigned team: Group 9 (most common: Group 70), increases risk"
+          },
+          {
+            "feature": "subcategory_cat",
+            "label": "Subcategory",
+            "value": "Subcategory 154",
+            "typical_value": "Subcategory 174",
+            "effect": 0.558,
+            "direction": "increases risk",
+            "sentence": "Subcategory: Subcategory 154 (most common: Subcategory 174), increases risk"
+          },
+          {
+            "feature": "group_recent_breach_rate_7d",
+            "label": "Team's breach rate in last 7 days",
+            "value": 0.54,
+            "typical_value": 0.36,
+            "effect": 0.509,
+            "direction": "increases risk",
+            "sentence": "Team's breach rate in last 7 days: 0.54 (usual: 0.36), increases risk"
+          }
+        ],
+        "explanation_summary": "High risk (89%) of missing SLA, mainly because: Assigned team: Group 9 (most common: Group 70), increases risk; Subcategory: Subcategory 154 (most common: Subcategory 174), increases risk; Team's breach rate in last 7 days: 0.54 (usual: 0.36), increases risk.",
+        "similar_past_cases": {
+          "rule": "same category and team, training period",
+          "count": 192,
+          "breach_rate": 0.938,
+          "median_resolution_hours": 2018.8
+        },
+        "recommended_action": {
+          "recommendation_id": "REC3",
+          "action": "Fast-track: senior agent picks it up within 1 hour",
+          "urgency": "now"
+        },
+        "actual_outcome": {
+          "breached": true,
+          "note": "known only because this is historical data; hidden in a live system"
+        }
+      },
+      {
+        "id": "INC0033653",
+        "item_type": "ticket",
+        "context": {
+          "opened_at": "2016-05-30T09:45",
+          "team": "Group 53",
+          "category": "Category 8",
+          "subcategory": "Subcategory 281",
+          "priority": 2,
+          "location": "Location 143",
+          "contact_type": "Phone"
+        },
+        "prediction": {
+          "target": "sla_breach",
+          "risk": 0.868,
+          "risk_level": "high",
+          "risk_percentile": 98.7,
+          "prediction_moment": "ticket opened"
+        },
+        "top_reasons": [
+          {
+            "feature": "priority_n",
+            "label": "Priority (1 = Critical)",
+            "value": 2.0,
+            "typical_value": 3.0,
+            "effect": 1.803,
+            "direction": "increases risk",
+            "sentence": "Priority (1 = Critical): 2 (usual: 3), increases risk"
+          },
+          {
+            "feature": "assignment_group_cat",
+            "label": "Assigned team",
+            "value": "Other",
+            "typical_value": "Group 70",
+            "effect": 0.568,
+            "direction": "increases risk",
+            "sentence": "Assigned team: Other (most common: Group 70), increases risk"
+          },
+          {
+            "feature": "group_recent_breach_rate_7d",
+            "label": "Team's breach rate in last 7 days",
+            "value": 0.43,
+            "typical_value": 0.36,
+            "effect": 0.36,
+            "direction": "increases risk",
+            "sentence": "Team's breach rate in last 7 days: 0.43 (usual: 0.36), increases risk"
+          }
+        ],
+        "explanation_summary": "High risk (87%) of missing SLA, mainly because: Priority (1 = Critical): 2 (usual: 3), increases risk; Assigned team: Other (most common: Group 70), increases risk; Team's breach rate in last 7 days: 0.43 (usual: 0.36), increases risk.",
+        "similar_past_cases": {
+          "rule": "same category and team, training period",
+          "count": 35,
+          "breach_rate": 0.429,
+          "median_resolution_hours": 18.9
+        },
+        "recommended_action": {
+          "recommendation_id": "REC3",
+          "action": "Fast-track: senior agent picks it up within 1 hour",
+          "urgency": "now"
+        },
+        "actual_outcome": {
+          "breached": true,
+          "note": "known only because this is historical data; hidden in a live system"
+        }
+      },
+      {
+        "id": "INC0033915",
+        "item_type": "ticket",
+        "context": {
+          "opened_at": "2016-05-30T16:05",
+          "team": "Group 66",
+          "category": "Category 46",
+          "subcategory": "Subcategory 220",
+          "priority": 3,
+          "location": "Location 204",
+          "contact_type": "Phone"
+        },
+        "prediction": {
+          "target": "sla_breach",
+          "risk": 0.829,
+          "risk_level": "high",
+          "risk_percentile": 98.1,
+          "prediction_moment": "ticket opened"
+        },
+        "top_reasons": [
+          {
+            "feature": "assignment_group_cat",
+            "label": "Assigned team",
+            "value": "Group 66",
+            "typical_value": "Group 70",
+            "effect": 1.019,
+            "direction": "increases risk",
+            "sentence": "Assigned team: Group 66 (most common: Group 70), increases risk"
+          },
+          {
+            "feature": "subcategory_cat",
+            "label": "Subcategory",
+            "value": "Subcategory 220",
+            "typical_value": "Subcategory 174",
+            "effect": 0.673,
+            "direction": "increases risk",
+            "sentence": "Subcategory: Subcategory 220 (most common: Subcategory 174), increases risk"
+          },
+          {
+            "feature": "group_recent_breach_rate_7d",
+            "label": "Team's breach rate in last 7 days",
+            "value": 0.61,
+            "typical_value": 0.36,
+            "effect": 0.46,
+            "direction": "increases risk",
+            "sentence": "Team's breach rate in last 7 days: 0.61 (usual: 0.36), increases risk"
+          }
+        ],
+        "explanation_summary": "High risk (83%) of missing SLA, mainly because: Assigned team: Group 66 (most common: Group 70), increases risk; Subcategory: Subcategory 220 (most common: Subcategory 174), increases risk; Team's breach rate in last 7 days: 0.61 (usual: 0.36), increases risk.",
+        "similar_past_cases": {
+          "rule": "same category and team, training period",
+          "count": 82,
+          "breach_rate": 0.829,
+          "median_resolution_hours": 395.0
+        },
+        "recommended_action": {
+          "recommendation_id": "REC3",
+          "action": "Fast-track: senior agent picks it up within 1 hour",
+          "urgency": "now"
+        },
+        "actual_outcome": {
+          "breached": true,
+          "note": "known only because this is historical data; hidden in a live system"
+        }
+      },
+      {
+        "id": "INC0034048",
+        "item_type": "ticket",
+        "context": {
+          "opened_at": "2016-05-31T08:33",
+          "team": "Group 9",
+          "category": "Category 61",
+          "subcategory": "Subcategory 16",
+          "priority": 3,
+          "location": "Location 161",
+          "contact_type": "Phone"
+        },
+        "prediction": {
+          "target": "sla_breach",
+          "risk": 0.827,
+          "risk_level": "high",
+          "risk_percentile": 98.0,
+          "prediction_moment": "ticket opened"
+        },
+        "top_reasons": [
+          {
+            "feature": "assignment_group_cat",
+            "label": "Assigned team",
+            "value": "Group 9",
+            "typical_value": "Group 70",
+            "effect": 1.291,
+            "direction": "increases risk",
+            "sentence": "Assigned team: Group 9 (most common: Group 70), increases risk"
+          },
+          {
+            "feature": "group_recent_breach_rate_7d",
+            "label": "Team's breach rate in last 7 days",
+            "value": 0.5,
+            "typical_value": 0.36,
+            "effect": 0.431,
+            "direction": "increases risk",
+            "sentence": "Team's breach rate in last 7 days: 0.5 (usual: 0.36), increases risk"
+          },
+          {
+            "feature": "category_cat",
+            "label": "Category",
+            "value": "Category 61",
+            "typical_value": "Category 42",
+            "effect": 0.392,
+            "direction": "increases risk",
+            "sentence": "Category: Category 61 (most common: Category 42), increases risk"
+          }
+        ],
+        "explanation_summary": "High risk (83%) of missing SLA, mainly because: Assigned team: Group 9 (most common: Group 70), increases risk; Team's breach rate in last 7 days: 0.5 (usual: 0.36), increases risk; Category: Category 61 (most common: Category 42), increases risk.",
+        "similar_past_cases": {
+          "rule": "same category and team, training period",
+          "count": 1,
+          "breach_rate": 1.0,
+          "median_resolution_hours": 248.8
+        },
+        "recommended_action": {
+          "recommendation_id": "REC3",
+          "action": "Fast-track: senior agent picks it up within 1 hour",
+          "urgency": "now"
+        },
+        "actual_outcome": {
+          "breached": true,
+          "note": "known only because this is historical data; hidden in a live system"
+        }
+      }
+    ]
+  },
+  "recommendations": [
+    {
+      "id": "REC4",
+      "title": "Cover Group 70 on its overloaded days",
+      "type": "capacity",
+      "description": "For Group 70: add cover for about 35 tickets on 2016-06-03; add cover for about 31 tickets on 2016-06-06; add cover for about 27 tickets on 2016-06-02; add cover for about 25 tickets on 2016-06-07; add cover for about 10 tickets on 2016-06-01; add cover for about 8 tickets on 2016-06-04; add cover for about 7 tickets on 2016-06-05.",
+      "target": {
+        "team": "Group 70"
+      },
+      "evidence": [
+        "FC-Group 70: Group 70 is expected to get about 132 tickets more than it can handle on 2016-06-02, 2016-06-03, 2016-06-04, 2016-06-05, 2016-06-06, 2016-06-07."
+      ],
+      "expected_impact": {
+        "metric": "sla_breach_rate",
+        "baseline": 0.225,
+        "expected": 0.17,
+        "change_pct_points": -5.5,
+        "breaches_avoided_per_period": 270,
+        "range_breaches_avoided": [
+          135,
+          270
+        ]
+      },
+      "estimate_method": "Day-by-day replay of next week with the plan and extra cover: tickets left waiting overnight fall from 540 to 0; half of them are assumed to breach.",
+      "assumptions": [
+        "Half the tickets that wait overnight because of overload would breach (to be validated)",
+        "Next week's forecast is compared with this period's breach rate"
+      ],
+      "confidence": "medium",
+      "effort": "low",
+      "suggested_owner": "Team lead",
+      "linked_findings": [
+        "FC-Group 70"
+      ],
+      "linked_root_causes": [],
+      "status": "pending",
+      "approval": {
+        "decided_by": null,
+        "decided_at": null,
+        "decision": null,
+        "comment": null
+      },
+      "quick_win": true
+    },
+    {
+      "id": "REC1",
+      "title": "Route tickets to the right team first time",
+      "type": "process",
+      "description": "Use the model's category/symptom signals to suggest the correct team at opening; require a reason when reassigning.",
+      "target": {
+        "tickets": "all new tickets",
+        "focus": "categories with most reassignments"
+      },
+      "evidence": [
+        "RC1: Breach rate rises from 22% with no reassignment to 43% after one and 86% after five or more."
+      ],
+      "expected_impact": {
+        "metric": "sla_breach_rate",
+        "baseline": 0.225,
+        "expected": 0.202,
+        "change_pct_points": -2.3,
+        "breaches_avoided_per_period": 111,
+        "range_breaches_avoided": [
+          55,
+          111
+        ]
+      },
+      "estimate_method": "Tickets with 2+ reassignments in the current period assumed to breach at the 1-reassignment rate.",
+      "assumptions": [
+        "Better routing cuts repeat reassignments, not the first one"
+      ],
+      "confidence": "high",
+      "effort": "medium",
+      "suggested_owner": "Helpdesk lead",
+      "linked_findings": [
+        "RC1"
+      ],
+      "linked_root_causes": [
+        "RC1"
+      ],
+      "status": "pending",
+      "approval": {
+        "decided_by": null,
+        "decided_at": null,
+        "decision": null,
+        "comment": null
+      },
+      "quick_win": false
+    },
+    {
+      "id": "REC3",
+      "title": "Fast-track the 10% highest-risk tickets",
+      "type": "prioritisation",
+      "description": "Every new ticket in the model's top 10% risk goes to a senior agent within 1 hour.",
+      "target": {
+        "tickets": "the model's top 10% risk"
+      },
+      "evidence": [
+        "RISK: The 10% of tickets the model flags hold 28% of all breaches (2.82x the normal rate)."
+      ],
+      "expected_impact": {
+        "metric": "sla_breach_rate",
+        "baseline": 0.225,
+        "expected": 0.205,
+        "change_pct_points": -2.0,
+        "breaches_avoided_per_period": 94,
+        "range_breaches_avoided": [
+          47,
+          94
+        ]
+      },
+      "estimate_method": "Assumes fast-tracking prevents 30% of breaches among flagged tickets (to be validated in a pilot).",
+      "assumptions": [
+        "30% prevention rate is an assumption"
+      ],
+      "confidence": "high",
+      "effort": "low",
+      "suggested_owner": "Shift supervisor",
+      "linked_findings": [
+        "RISK"
+      ],
+      "linked_root_causes": [],
+      "status": "pending",
+      "approval": {
+        "decided_by": null,
+        "decided_at": null,
+        "decision": null,
+        "comment": null
+      },
+      "quick_win": false
+    },
+    {
+      "id": "REC2",
+      "title": "Rebalance workload away from Group 20",
+      "type": "capacity",
+      "description": "Move part of Group 20's incoming tickets to teams with spare capacity, or add temporary staff.",
+      "target": {
+        "team": "Group 20"
+      },
+      "evidence": [
+        "RC2: Group 20 breached 40% of its 302 tickets this period vs 22% overall."
+      ],
+      "expected_impact": {
+        "metric": "sla_breach_rate",
+        "baseline": 0.225,
+        "expected": 0.214,
+        "change_pct_points": -1.1,
+        "breaches_avoided_per_period": 53,
+        "range_breaches_avoided": [
+          27,
+          53
+        ]
+      },
+      "estimate_method": "Team assumed to reach the overall breach rate after rebalancing.",
+      "assumptions": [
+        "Receiving teams have the skills and spare capacity"
+      ],
+      "confidence": "medium",
+      "effort": "low",
+      "suggested_owner": "Operations manager",
+      "linked_findings": [
+        "RC2",
+        "FC-Group 20"
+      ],
+      "linked_root_causes": [
+        "RC2"
+      ],
+      "status": "pending",
+      "approval": {
+        "decided_by": null,
+        "decided_at": null,
+        "decision": null,
+        "comment": null
+      },
+      "quick_win": false
+    }
+  ],
+  "impact_simulation": {
+    "period": "current",
+    "baseline": {
+      "tickets": 4929,
+      "breaches": 1107,
+      "breach_rate": 0.225
+    },
+    "scenarios": [
+      {
+        "recommendation_id": "REC4",
+        "breach_rate": 0.17,
+        "breaches_avoided": 270
+      },
+      {
+        "recommendation_id": "REC1",
+        "breach_rate": 0.202,
+        "breaches_avoided": 111
+      },
+      {
+        "recommendation_id": "REC3",
+        "breach_rate": 0.205,
+        "breaches_avoided": 94
+      },
+      {
+        "recommendation_id": "REC2",
+        "breach_rate": 0.214,
+        "breaches_avoided": 53
+      }
+    ],
+    "replays": {
+      "queues": {
+        "rule": "each day: queue = left over + arrivals; finished = capacity; the rest waits overnight",
+        "with_cover": true,
+        "teams": [
+          {
+            "team": "Group 70",
+            "baseline": {
+              "ticket_nights_waiting": 539.5,
+              "peak_load_vs_capacity": 6.45
+            },
+            "with_plan": {
+              "ticket_nights_waiting": 0.4,
+              "peak_load_vs_capacity": 1.02
+            }
+          },
+          {
+            "team": "Group 20",
+            "baseline": {
+              "ticket_nights_waiting": 53.2,
+              "peak_load_vs_capacity": 13.37
+            },
+            "with_plan": {
+              "ticket_nights_waiting": 0.2,
+              "peak_load_vs_capacity": 1.03
+            }
+          },
+          {
+            "team": "Group 65",
+            "baseline": {
+              "ticket_nights_waiting": 14.9,
+              "peak_load_vs_capacity": 13.0
+            },
+            "with_plan": {
+              "ticket_nights_waiting": 1.3,
+              "peak_load_vs_capacity": 3.0
+            }
+          },
+          {
+            "team": "Group 25",
+            "baseline": {
+              "ticket_nights_waiting": 25.5,
+              "peak_load_vs_capacity": 2.17
+            },
+            "with_plan": {
+              "ticket_nights_waiting": 1.7,
+              "peak_load_vs_capacity": 1.07
+            }
+          },
+          {
+            "team": "Group 24",
+            "baseline": {
+              "ticket_nights_waiting": 8.8,
+              "peak_load_vs_capacity": 14.0
+            },
+            "with_plan": {
+              "ticket_nights_waiting": 2.8,
+              "peak_load_vs_capacity": 4.0
+            }
+          }
+        ]
+      }
+    },
+    "note": "Scenarios are estimated separately and are not additive (they overlap)."
+  },
+  "model_performance": {
+    "algorithm": "LightGBM + logistic regression (70% / 30% blend)",
+    "test_auc": 0.811,
+    "train_auc": 0.905,
+    "base_rate_test": 0.225,
+    "precision_top_10pct": 0.633,
+    "lift_top_10pct": 2.82,
+    "n_features": 32,
+    "train_rows": 19715,
+    "test_rows": 4929,
+    "validation": "time-based split: trained on older tickets, tested on newest 20%",
+    "test_period": {
+      "start": "2016-05-10",
+      "end": "2016-05-31"
+    }
+  },
+  "ranked_findings": {
+    "rule": "score = size x confidence x urgency; confidence high 1.0, medium 0.7, low 0.5",
+    "items": [
+      {
+        "id": "RC1",
+        "type": "process",
+        "title": "Tickets bounced between teams (reassignment)",
+        "finding": "Breach rate rises from 22% with no reassignment to 43% after one and 86% after five or more.",
+        "subject": null,
+        "size": 0.407,
+        "confidence": "high",
+        "urgency": 1.0,
+        "score": 0.407,
+        "evidence": [
+          {
+            "segment": "0 reassignments",
+            "breach_rate": 0.215
+          },
+          {
+            "segment": "1 reassignment",
+            "breach_rate": 0.43
+          },
+          {
+            "segment": "2+ reassignments",
+            "breach_rate": 0.687,
+            "tickets": 5075
+          },
+          {
+            "segment": "5+ reassignments",
+            "breach_rate": 0.859
+          }
+        ],
+        "source": "root_causes",
+        "rank": 1,
+        "why": "Ranked 1: 41% of this period's problems are linked to it; confidence high (score 0.407)."
+      },
+      {
+        "id": "RISK",
+        "type": "high_risk",
+        "title": "High-risk new tickets",
+        "finding": "The 10% of tickets the model flags hold 28% of all breaches (2.82x the normal rate).",
+        "subject": null,
+        "size": 0.282,
+        "confidence": "high",
+        "urgency": 1.0,
+        "score": 0.282,
+        "evidence": [
+          {
+            "precision_top_10pct": 0.633,
+            "base_rate": 0.225
+          }
+        ],
+        "source": "predictions",
+        "rank": 2,
+        "why": "Ranked 2: 28% of all problems sit in the riskiest 10% of items; confidence high (score 0.282)."
+      },
+      {
+        "id": "FC-Group 70",
+        "type": "overload",
+        "title": "Group 70 overloaded next week",
+        "finding": "Group 70 is expected to get about 132 tickets more than it can handle on 2016-06-02, 2016-06-03, 2016-06-04, 2016-06-05, 2016-06-06, 2016-06-07.",
+        "subject": "Group 70",
+        "size": 0.112,
+        "confidence": "medium",
+        "urgency": 1.0,
+        "score": 0.078,
+        "evidence": [
+          {
+            "date": "2016-06-02",
+            "expected_tickets": 160.8,
+            "expected_capacity": 134.2,
+            "overload": true
+          },
+          {
+            "date": "2016-06-03",
+            "expected_tickets": 167.6,
+            "expected_capacity": 133.0,
+            "overload": true
+          },
+          {
+            "date": "2016-06-04",
+            "expected_tickets": 26.8,
+            "expected_capacity": 18.8,
+            "overload": true
+          },
+          {
+            "date": "2016-06-05",
+            "expected_tickets": 23.2,
+            "expected_capacity": 15.8,
+            "overload": true
+          },
+          {
+            "date": "2016-06-06",
+            "expected_tickets": 219.1,
+            "expected_capacity": 188.5,
+            "overload": true
+          },
+          {
+            "date": "2016-06-07",
+            "expected_tickets": 170.2,
+            "expected_capacity": 145.2,
+            "overload": true
+          }
+        ],
+        "source": "forecast",
+        "rank": 3,
+        "why": "Ranked 3: 11% of next week's expected tickets are extra work above capacity; confidence medium (score 0.078)."
+      },
+      {
+        "id": "RC2",
+        "type": "capacity",
+        "title": "Group 20 is under strain",
+        "finding": "Group 20 breached 40% of its 302 tickets this period vs 22% overall.",
+        "subject": "Group 20",
+        "size": 0.109,
+        "confidence": "medium",
+        "urgency": 1.0,
+        "score": 0.076,
+        "evidence": [
+          {
+            "segment": "Group 20",
+            "breach_rate": 0.401,
+            "tickets": 302
+          },
+          {
+            "segment": "all teams",
+            "breach_rate": 0.225,
+            "tickets": 4929
+          },
+          {
+            "forecast": "Group 20 is expected to get about 9 tickets more than it can handle on 2016-06-02, 2016-06-04, 2016-06-05."
+          }
+        ],
+        "source": "root_causes",
+        "related": "FC-Group 20",
+        "rank": 4,
+        "why": "Ranked 4: 11% of this period's problems are linked to it; confidence medium (score 0.076)."
+      }
+    ],
+    "watch": [
+      {
+        "id": "RC3",
+        "type": "quality",
+        "title": "Reopened tickets",
+        "finding": "Reopened tickets breach 76% of the time vs 36% for others.",
+        "subject": null,
+        "size": 0.023,
+        "confidence": "medium",
+        "urgency": 1.0,
+        "score": 0.016,
+        "evidence": [
+          {
+            "segment": "reopened",
+            "breach_rate": 0.764
+          },
+          {
+            "segment": "not reopened",
+            "breach_rate": 0.362
+          }
+        ],
+        "source": "root_causes",
+        "rank": null,
+        "why": "On the watch list: too small to act on now."
+      },
+      {
+        "id": "FC-Group 25",
+        "type": "overload",
+        "title": "Group 25 overloaded next week",
+        "finding": "Group 25 is expected to get about 7 tickets more than it can handle on 2016-06-01, 2016-06-07.",
+        "subject": "Group 25",
+        "size": 0.006,
+        "confidence": "medium",
+        "urgency": 1.0,
+        "score": 0.004,
+        "evidence": [
+          {
+            "date": "2016-06-01",
+            "expected_tickets": 10.4,
+            "expected_capacity": 4.8,
+            "overload": true
+          },
+          {
+            "date": "2016-06-07",
+            "expected_tickets": 8.2,
+            "expected_capacity": 7.0,
+            "overload": true
+          }
+        ],
+        "source": "forecast",
+        "rank": null,
+        "why": "On the watch list: too small to act on now."
+      },
+      {
+        "id": "FC-Group 65",
+        "type": "overload",
+        "title": "Group 65 overloaded next week",
+        "finding": "Group 65 is expected to get about 6 tickets more than it can handle on 2016-06-04, 2016-06-05.",
+        "subject": "Group 65",
+        "size": 0.005,
+        "confidence": "medium",
+        "urgency": 1.0,
+        "score": 0.003,
+        "evidence": [
+          {
+            "date": "2016-06-04",
+            "expected_tickets": 3.6,
+            "expected_capacity": 0.5,
+            "overload": true
+          },
+          {
+            "date": "2016-06-05",
+            "expected_tickets": 3.4,
+            "expected_capacity": 0.5,
+            "overload": true
+          }
+        ],
+        "source": "forecast",
+        "rank": null,
+        "why": "On the watch list: too small to act on now."
+      },
+      {
+        "id": "FC-Group 24",
+        "type": "overload",
+        "title": "Group 24 overloaded next week",
+        "finding": "Group 24 is expected to get about 2 tickets more than it can handle on 2016-06-03.",
+        "subject": "Group 24",
+        "size": 0.002,
+        "confidence": "medium",
+        "urgency": 1.0,
+        "score": 0.001,
+        "evidence": [
+          {
+            "date": "2016-06-03",
+            "expected_tickets": 7.2,
+            "expected_capacity": 5.0,
+            "overload": true
+          }
+        ],
+        "source": "forecast",
+        "rank": null,
+        "why": "On the watch list: too small to act on now."
+      }
+    ],
+    "history": [
+      {
+        "id": "AN-2016-03-06",
+        "type": "anomaly",
+        "title": "Weekly SLA breach rate unusual in the week to 2016-03-06",
+        "finding": "55.9% against a normal 25.1% (deviation score 4.4).",
+        "subject": null,
+        "size": 0.44000000000000006,
+        "confidence": "high",
+        "urgency": 0.0,
+        "score": 0.0,
+        "evidence": [
+          {
+            "week_ending": "2016-03-06",
+            "metric": "breach_rate",
+            "label": "Weekly SLA breach rate",
+            "actual": 0.559,
+            "expected": 0.251,
+            "deviation_score": 4.4,
+            "severity": "critical",
+            "direction": "above_normal"
+          }
+        ],
+        "source": "anomalies",
+        "rank": null,
+        "why": "Kept as history: this unusual week is over."
+      },
+      {
+        "id": "AN-2016-03-13",
+        "type": "anomaly",
+        "title": "Weekly SLA breach rate unusual in the week to 2016-03-13",
+        "finding": "95.8% against a normal 25.1% (deviation score 10.2).",
+        "subject": null,
+        "size": 1.0,
+        "confidence": "high",
+        "urgency": 0.0,
+        "score": 0.0,
+        "evidence": [
+          {
+            "week_ending": "2016-03-13",
+            "metric": "breach_rate",
+            "label": "Weekly SLA breach rate",
+            "actual": 0.958,
+            "expected": 0.251,
+            "deviation_score": 10.2,
+            "severity": "critical",
+            "direction": "above_normal"
+          }
+        ],
+        "source": "anomalies",
+        "rank": null,
+        "why": "Kept as history: this unusual week is over."
+      },
+      {
+        "id": "AN-2016-03-20",
+        "type": "anomaly",
+        "title": "Weekly SLA breach rate unusual in the week to 2016-03-20",
+        "finding": "65.6% against a normal 25.1% (deviation score 5.8).",
+        "subject": null,
+        "size": 0.58,
+        "confidence": "high",
+        "urgency": 0.0,
+        "score": 0.0,
+        "evidence": [
+          {
+            "week_ending": "2016-03-20",
+            "metric": "breach_rate",
+            "label": "Weekly SLA breach rate",
+            "actual": 0.656,
+            "expected": 0.251,
+            "deviation_score": 5.8,
+            "severity": "critical",
+            "direction": "above_normal"
+          }
+        ],
+        "source": "anomalies",
+        "rank": null,
+        "why": "Kept as history: this unusual week is over."
+      },
+      {
+        "id": "AN-2016-03-27",
+        "type": "anomaly",
+        "title": "Weekly SLA breach rate unusual in the week to 2016-03-27",
+        "finding": "39.2% against a normal 25.1% (deviation score 2.0).",
+        "subject": null,
+        "size": 0.2,
+        "confidence": "medium",
+        "urgency": 0.0,
+        "score": 0.0,
+        "evidence": [
+          {
+            "week_ending": "2016-03-27",
+            "metric": "breach_rate",
+            "label": "Weekly SLA breach rate",
+            "actual": 0.392,
+            "expected": 0.251,
+            "deviation_score": 2.0,
+            "severity": "warning",
+            "direction": "above_normal"
+          }
+        ],
+        "source": "anomalies",
+        "rank": null,
+        "why": "Kept as history: this unusual week is over."
+      }
+    ],
+    "context": [],
+    "note": "Findings are correlations in historical data; the simulation estimates the effect of acting on them."
+  },
+  "priority_queue": [
+    {
+      "id": "INC0034380",
+      "risk": 0.909,
+      "weight": 4,
+      "score": 3.636,
+      "team": "Group 55",
+      "why": "risk 91% x priority weight 4",
+      "rank": 1
+    },
+    {
+      "id": "INC0034423",
+      "risk": 0.935,
+      "weight": 3,
+      "score": 2.805,
+      "team": "Group 22",
+      "why": "risk 94% x priority weight 3",
+      "rank": 2
+    },
+    {
+      "id": "INC0034416",
+      "risk": 0.922,
+      "weight": 3,
+      "score": 2.766,
+      "team": "Group 22",
+      "why": "risk 92% x priority weight 3",
+      "rank": 3
+    },
+    {
+      "id": "INC0034429",
+      "risk": 0.915,
+      "weight": 3,
+      "score": 2.745,
+      "team": "Group 57",
+      "why": "risk 92% x priority weight 3",
+      "rank": 4
+    },
+    {
+      "id": "INC0033653",
+      "risk": 0.868,
+      "weight": 3,
+      "score": 2.604,
+      "team": "Group 53",
+      "why": "risk 87% x priority weight 3",
+      "rank": 5
+    },
+    {
+      "id": "INC0034330",
+      "risk": 0.915,
+      "weight": 2,
+      "score": 1.83,
+      "team": "Group 9",
+      "why": "risk 92% x priority weight 2",
+      "rank": 6
+    },
+    {
+      "id": "INC0034301",
+      "risk": 0.904,
+      "weight": 2,
+      "score": 1.808,
+      "team": "Group 9",
+      "why": "risk 90% x priority weight 2",
+      "rank": 7
+    },
+    {
+      "id": "INC0034268",
+      "risk": 0.893,
+      "weight": 2,
+      "score": 1.786,
+      "team": "Group 9",
+      "why": "risk 89% x priority weight 2",
+      "rank": 8
+    },
+    {
+      "id": "INC0033915",
+      "risk": 0.829,
+      "weight": 2,
+      "score": 1.658,
+      "team": "Group 66",
+      "why": "risk 83% x priority weight 2",
+      "rank": 9
+    },
+    {
+      "id": "INC0034048",
+      "risk": 0.827,
+      "weight": 2,
+      "score": 1.654,
+      "team": "Group 9",
+      "why": "risk 83% x priority weight 2",
+      "rank": 10
+    }
+  ],
+  "workload_plan": {
+    "rules": {
+      "low_risk_share_movable": 0.6,
+      "helper_min_category_overlap": 0.5,
+      "category_known_after_tickets": 20,
+      "moves_only_one_day_later": true
+    },
+    "moves": [
+      {
+        "date": "2016-06-01",
+        "tickets": 2,
+        "from_team": "Group 25",
+        "to_team": "Group 25",
+        "to_date": "2016-06-02",
+        "why": "low-risk tickets with time left; Group 25 has 3 spare on 2016-06-02"
+      },
+      {
+        "date": "2016-06-01",
+        "tickets": 2,
+        "from_team": "Group 25",
+        "to_team": "Group 24",
+        "to_date": "2016-06-01",
+        "why": "Group 24 has 3 spare and knows 84% of Group 25's kinds of tickets"
+      },
+      {
+        "date": "2016-06-05",
+        "tickets": 2,
+        "from_team": "Group 65",
+        "to_team": "Group 65",
+        "to_date": "2016-06-06",
+        "why": "low-risk tickets with time left; Group 65 has 3 spare on 2016-06-06"
+      },
+      {
+        "date": "2016-06-07",
+        "tickets": 1,
+        "from_team": "Group 25",
+        "to_team": "Group 24",
+        "to_date": "2016-06-07",
+        "why": "Group 24 has 4 spare and knows 84% of Group 25's kinds of tickets"
+      }
+    ],
+    "staffing_gaps": [
+      {
+        "date": "2016-06-03",
+        "team": "Group 70",
+        "tickets": 35,
+        "why": "no rule-respecting move left; add cover (overtime or a temporary agent)"
+      },
+      {
+        "date": "2016-06-06",
+        "team": "Group 70",
+        "tickets": 31,
+        "why": "no rule-respecting move left; add cover (overtime or a temporary agent)"
+      },
+      {
+        "date": "2016-06-02",
+        "team": "Group 70",
+        "tickets": 27,
+        "why": "no rule-respecting move left; add cover (overtime or a temporary agent)"
+      },
+      {
+        "date": "2016-06-07",
+        "team": "Group 70",
+        "tickets": 25,
+        "why": "no rule-respecting move left; add cover (overtime or a temporary agent)"
+      },
+      {
+        "date": "2016-06-01",
+        "team": "Group 70",
+        "tickets": 10,
+        "why": "no rule-respecting move left; add cover (overtime or a temporary agent)"
+      },
+      {
+        "date": "2016-06-04",
+        "team": "Group 70",
+        "tickets": 8,
+        "why": "no rule-respecting move left; add cover (overtime or a temporary agent)"
+      },
+      {
+        "date": "2016-06-05",
+        "team": "Group 70",
+        "tickets": 7,
+        "why": "no rule-respecting move left; add cover (overtime or a temporary agent)"
+      },
+      {
+        "date": "2016-06-01",
+        "team": "Group 25",
+        "tickets": 2,
+        "why": "no rule-respecting move left; add cover (overtime or a temporary agent)"
+      },
+      {
+        "date": "2016-06-02",
+        "team": "Group 20",
+        "tickets": 4,
+        "why": "no rule-respecting move left; add cover (overtime or a temporary agent)"
+      },
+      {
+        "date": "2016-06-04",
+        "team": "Group 65",
+        "tickets": 3,
+        "why": "no rule-respecting move left; add cover (overtime or a temporary agent)"
+      },
+      {
+        "date": "2016-06-05",
+        "team": "Group 20",
+        "tickets": 3,
+        "why": "no rule-respecting move left; add cover (overtime or a temporary agent)"
+      },
+      {
+        "date": "2016-06-03",
+        "team": "Group 24",
+        "tickets": 2,
+        "why": "no rule-respecting move left; add cover (overtime or a temporary agent)"
+      },
+      {
+        "date": "2016-06-04",
+        "team": "Group 20",
+        "tickets": 2,
+        "why": "no rule-respecting move left; add cover (overtime or a temporary agent)"
+      },
+      {
+        "date": "2016-06-06",
+        "team": "Group 20",
+        "tickets": 2,
+        "why": "no rule-respecting move left; add cover (overtime or a temporary agent)"
+      },
+      {
+        "date": "2016-06-07",
+        "team": "Group 20",
+        "tickets": 2,
+        "why": "no rule-respecting move left; add cover (overtime or a temporary agent)"
+      },
+      {
+        "date": "2016-06-01",
+        "team": "Group 20",
+        "tickets": 1,
+        "why": "no rule-respecting move left; add cover (overtime or a temporary agent)"
+      }
+    ],
+    "after": [
+      {
+        "team": "Group 70",
+        "date": "2016-06-01",
+        "expected_before": 173.7,
+        "expected_after": 173.7,
+        "capacity": 164.2
+      },
+      {
+        "team": "Group 70",
+        "date": "2016-06-02",
+        "expected_before": 160.8,
+        "expected_after": 160.8,
+        "capacity": 134.2
+      },
+      {
+        "team": "Group 70",
+        "date": "2016-06-03",
+        "expected_before": 167.6,
+        "expected_after": 167.6,
+        "capacity": 133.0
+      },
+      {
+        "team": "Group 70",
+        "date": "2016-06-04",
+        "expected_before": 26.8,
+        "expected_after": 26.8,
+        "capacity": 18.8
+      },
+      {
+        "team": "Group 70",
+        "date": "2016-06-05",
+        "expected_before": 23.2,
+        "expected_after": 23.2,
+        "capacity": 15.8
+      },
+      {
+        "team": "Group 70",
+        "date": "2016-06-06",
+        "expected_before": 219.1,
+        "expected_after": 219.1,
+        "capacity": 188.5
+      },
+      {
+        "team": "Group 70",
+        "date": "2016-06-07",
+        "expected_before": 170.2,
+        "expected_after": 170.2,
+        "capacity": 145.2
+      },
+      {
+        "team": "Group 20",
+        "date": "2016-06-01",
+        "expected_before": 21.5,
+        "expected_after": 21.5,
+        "capacity": 20.5
+      },
+      {
+        "team": "Group 20",
+        "date": "2016-06-02",
+        "expected_before": 18.9,
+        "expected_after": 18.9,
+        "capacity": 15.0
+      },
+      {
+        "team": "Group 20",
+        "date": "2016-06-03",
+        "expected_before": 16.8,
+        "expected_after": 16.8,
+        "capacity": 16.8
+      },
+      {
+        "team": "Group 20",
+        "date": "2016-06-04",
+        "expected_before": 3.1,
+        "expected_after": 3.1,
+        "capacity": 1.0
+      },
+      {
+        "team": "Group 20",
+        "date": "2016-06-05",
+        "expected_before": 3.7,
+        "expected_after": 3.7,
+        "capacity": 0.8
+      },
+      {
+        "team": "Group 20",
+        "date": "2016-06-06",
+        "expected_before": 25.9,
+        "expected_after": 25.9,
+        "capacity": 23.8
+      },
+      {
+        "team": "Group 20",
+        "date": "2016-06-07",
+        "expected_before": 21.0,
+        "expected_after": 21.0,
+        "capacity": 19.5
+      },
+      {
+        "team": "Group 65",
+        "date": "2016-06-01",
+        "expected_before": 9.6,
+        "expected_after": 9.6,
+        "capacity": 12.8
+      },
+      {
+        "team": "Group 65",
+        "date": "2016-06-02",
+        "expected_before": 6.2,
+        "expected_after": 6.2,
+        "capacity": 9.5
+      },
+      {
+        "team": "Group 65",
+        "date": "2016-06-03",
+        "expected_before": 6.3,
+        "expected_after": 6.3,
+        "capacity": 8.5
+      },
+      {
+        "team": "Group 65",
+        "date": "2016-06-04",
+        "expected_before": 3.6,
+        "expected_after": 3.6,
+        "capacity": 0.5
+      },
+      {
+        "team": "Group 65",
+        "date": "2016-06-05",
+        "expected_before": 3.4,
+        "expected_after": 1.4,
+        "capacity": 0.5
+      },
+      {
+        "team": "Group 65",
+        "date": "2016-06-06",
+        "expected_before": 9.4,
+        "expected_after": 11.4,
+        "capacity": 12.2
+      },
+      {
+        "team": "Group 65",
+        "date": "2016-06-07",
+        "expected_before": 8.6,
+        "expected_after": 8.6,
+        "capacity": 9.2
+      },
+      {
+        "team": "Group 25",
+        "date": "2016-06-01",
+        "expected_before": 10.4,
+        "expected_after": 6.4,
+        "capacity": 4.8
+      },
+      {
+        "team": "Group 25",
+        "date": "2016-06-02",
+        "expected_before": 8.4,
+        "expected_after": 10.4,
+        "capacity": 11.0
+      },
+      {
+        "team": "Group 25",
+        "date": "2016-06-03",
+        "expected_before": 7.7,
+        "expected_after": 7.7,
+        "capacity": 7.2
+      },
+      {
+        "team": "Group 25",
+        "date": "2016-06-04",
+        "expected_before": 0.0,
+        "expected_after": 0.0,
+        "capacity": 0.0
+      },
+      {
+        "team": "Group 25",
+        "date": "2016-06-05",
+        "expected_before": 0.0,
+        "expected_after": 0.0,
+        "capacity": 0.0
+      },
+      {
+        "team": "Group 25",
+        "date": "2016-06-06",
+        "expected_before": 10.1,
+        "expected_after": 10.1,
+        "capacity": 11.0
+      },
+      {
+        "team": "Group 25",
+        "date": "2016-06-07",
+        "expected_before": 8.2,
+        "expected_after": 7.2,
+        "capacity": 7.0
+      },
+      {
+        "team": "Group 24",
+        "date": "2016-06-01",
+        "expected_before": 6.6,
+        "expected_after": 8.6,
+        "capacity": 9.2
+      },
+      {
+        "team": "Group 24",
+        "date": "2016-06-02",
+        "expected_before": 6.4,
+        "expected_after": 6.4,
+        "capacity": 5.8
+      },
+      {
+        "team": "Group 24",
+        "date": "2016-06-03",
+        "expected_before": 7.2,
+        "expected_after": 7.2,
+        "capacity": 5.0
+      },
+      {
+        "team": "Group 24",
+        "date": "2016-06-04",
+        "expected_before": 0.0,
+        "expected_after": 0.0,
+        "capacity": 0.0
+      },
+      {
+        "team": "Group 24",
+        "date": "2016-06-05",
+        "expected_before": 0.0,
+        "expected_after": 0.0,
+        "capacity": 0.2
+      },
+      {
+        "team": "Group 24",
+        "date": "2016-06-06",
+        "expected_before": 7.3,
+        "expected_after": 7.3,
+        "capacity": 11.2
+      },
+      {
+        "team": "Group 24",
+        "date": "2016-06-07",
+        "expected_before": 6.9,
+        "expected_after": 7.9,
+        "capacity": 11.0
+      }
+    ],
+    "check": {
+      "every_ticket_assigned_once": true,
+      "no_team_over_capacity_after_plan_and_cover": true,
+      "no_high_risk_ticket_moved": true
+    }
+  }
+}
